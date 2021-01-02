@@ -29,6 +29,18 @@ var createUser = function(discord_id) {
     });
 };
 
+var deleteUser = function(user_id) {
+
+    return new Promise(function (resolve, reject) {
+        pool.query(`DELETE FROM users WHERE id = '${user_id}'`, function(err, result) {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(true);
+        });
+    });
+}
+
 var userExists = function(discord_id) {
 
     return new Promise(function (resolve, reject) {
@@ -61,8 +73,22 @@ var createAlarm = function(user_id) {
     });
 };
 
+var deleteAlarm = function(user_id) {
+
+    return new Promise(function (resolve, reject) {
+        pool.query(`DELETE FROM alarms WHERE user_id = '${user_id}'`, function(err, result) {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(true);
+        });
+    });
+}
+
 module.exports = {
   userExists: (text) => userExists(text),
   createUser: (newUser) => createUser(newUser),
-  createAlarm: (user_id) => createAlarm(user_id)
+  deleteUser: (user_id) => deleteUser(user_id),
+  createAlarm: (user_id) => createAlarm(user_id),
+  deleteAlarm: (user_id) => deleteAlarm(user_id)
 }

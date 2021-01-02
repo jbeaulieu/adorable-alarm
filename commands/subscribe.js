@@ -3,6 +3,7 @@ module.exports = {
     description: 'Subscribe user to alarm feed',
     execute(msg, args) {
 
+        const db = require('../db');
         const newSubscriber = msg.author;
 
         // Query user table to see if this user is already subscribed
