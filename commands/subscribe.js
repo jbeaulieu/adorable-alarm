@@ -5,6 +5,7 @@ module.exports = {
 
         const db = require('../db');
         const newSubscriber = msg.author;
+        const time = db.parsetime(args[0])
 
         // Query user table to see if this user is already subscribed
         db.userExists(newSubscriber.id)
@@ -14,15 +15,24 @@ module.exports = {
                 db.createUser(newSubscriber.id)
                 .then(function(new_user_id) {
                     user_id = new_user_id;
-                    db.createAlarm(user_id);
+                    if(time != -1) {
+                        db.createAlarm(user_id, time);
+                        msg.channel.send(`Subscribed <@${newSubscriber.id}> to Adorable Alarms at ${time}!`);
+                    } else {
+                        msg.send(`<@${newSubscriber.id}>, I couldn't read a valid time to subscribe you to. Please try again`);
+                    }
                 });
             } else {
                 // User already exists, create an alarm tied to their user_id
-                db.createAlarm(user_id);
+                if(time != -1) {
+                    db.createAlarm(user_id, time);
+                    msg.channel.send(`<@${newSubscriber.id}>, you've added ${time} to your alarms!`);
+                } else {
+                    msg.send(`<@${newSubscriber.id}>, I couldn't read a valid time to add to your subscription. Please try again`);
+                }
             }
         })
         .catch(function(err) { console.log(err) });
 
-        msg.channel.send(`Subscribed <@${newSubscriber.id}> to Adorable Alarms!`);
     },
   };

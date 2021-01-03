@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "dayjs": "^1.9.8",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "nodemon": "^2.0.6",
