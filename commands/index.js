@@ -5,5 +5,6 @@ module.exports = {
     Subscribe: require('./subscribe'),
     Unsubscribe: require('./unsubscribe'),
     AddAlarm: require('./addAlarm'),
-    RemoveAlarm: require('./removeAlarm')
+    RemoveAlarm: require('./removeAlarm'),
+    Timezone: require('./timezone')
   };

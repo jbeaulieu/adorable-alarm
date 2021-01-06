@@ -7,10 +7,19 @@ const pool = new Pool({
     }
 });
 
-var createUser = function(discord_id) {
+const timezoneMap = {
+    'EST': '-05',
+    'CST': '-06',
+    'MST': '-07',
+    'PST': '-08',
+    'AKST': '-09',
+    'HST': '-10',
+};
+
+var createUser = function(discord_id, timezone) {
 
     return new Promise(function (resolve, reject) {
-        pool.query(`INSERT INTO users VALUES (DEFAULT, 1, now()::timestamp, '${discord_id}')`, function(err, result) {
+        pool.query(`INSERT INTO users VALUES (DEFAULT, 1, now()::timestamp, '${discord_id}', '${timezone}')`, function(err, result) {
             if (err) {
                 return reject(err);
             }
@@ -124,12 +133,40 @@ var parsetime = function (text) {
     }
 }
 
+var parseTimezone = function(text) {
+    
+    if(timezoneMap[text] != null)
+    {
+        return timezoneMap[text];
+    } else {
+        return -1;
+    }
+}
+
+var setTimezone = function(user_id, timezone) {
+
+    return new Promise(function (resolve, reject) {
+        pool.query(`UPDATE users SET timezone = '${timezone}' WHERE id=${user_id};`, function(err, result) {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(true);
+        });
+    });
+}
+
+var getTimezone = function(user_id) {
+
+}
+
 module.exports = {
   userExists: (text) => userExists(text),
-  createUser: (newUser) => createUser(newUser),
+  createUser: (newUser, timezone) => createUser(newUser, timezone),
   deleteUser: (user_id) => deleteUser(user_id),
   createAlarm: (user_id, time) => createAlarm(user_id, time),
   deleteAlarm: (user_id, time) => deleteAlarm(user_id, time),
   deleteAllAlarms: (user_id) => deleteAllAlarms(user_id),
-  parsetime: (text) => parsetime(text)
+  parsetime: (text) => parsetime(text),
+  parseTimezone: (text) => parseTimezone(text),
+  setTimezone: (user_id, timezone) => setTimezone(user_id, timezone)
 }

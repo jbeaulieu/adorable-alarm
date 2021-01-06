@@ -5,34 +5,41 @@ module.exports = {
 
         const db = require('../db');
         const newSubscriber = msg.author;
-        const time = db.parsetime(args[0])
 
         // Query user table to see if this user is already subscribed
         db.userExists(newSubscriber.id)
         .then(function(user_id) {
             if (user_id==-1) {
                 // User does not already exist, so let's create a new user before setting up their alarm
-                db.createUser(newSubscriber.id)
-                .then(function(new_user_id) {
-                    user_id = new_user_id;
-                    if(time != -1) {
-                        db.createAlarm(user_id, time);
-                        msg.channel.send(`Subscribed <@${newSubscriber.id}> to Adorable Alarms at ${time}!`);
+
+                //Check if user supplied a valid timezone as an argument
+                if(args[0] != null) {
+                    var timezone = db.parseTimezone(args[0].toUpperCase());
+                    
+                    if(timezone != -1) {
+                        // A valid timezone was provided. Create a new user entry with that timezone assigned
+                        db.createUser(newSubscriber.id, timezone)
+                        msg.channel.send(`Congratulations <@${newSubscriber.id}>, you're signed up! You can now add alarms`)
                     } else {
-                        msg.send(`<@${newSubscriber.id}>, I couldn't read a valid time to subscribe you to. Please try again`);
+                        // An argument was provided, but it couldn't be parsed to match a valid timezone
+                        db.createUser(newSubscriber.id, '')
+                        msg.channel.send(`<@${newSubscriber.id}>, I couldn't read that timezone. Please set it manually with `
+                            + `the \`!timezone\` command`)
                     }
-                });
-            } else {
-                // User already exists, create an alarm tied to their user_id
-                if(time != -1) {
-                    db.createAlarm(user_id, time);
-                    msg.channel.send(`<@${newSubscriber.id}>, you've added ${time} to your alarms!`);
                 } else {
-                    msg.send(`<@${newSubscriber.id}>, I couldn't read a valid time to add to your subscription. Please try again`);
+                    // User did not provide a timezone argument. Create a new user, but alert them that one is needed
+                    db.createUser(newSubscriber.id, '')
+                    msg.channel.send(`Welcome, <@${newSubscriber.id}>! Before you can create alarms, you'll need to set your `
+                        + `timezone using the \`!timezone\` command. Otherwise, your alarm times will default to UTC. Thanks!`)
                 }
+
+            } else {
+                // User already exists
+                msg.channel.send(`<@${newSubscriber.id}>, you're already subscribed!`)
             }
         })
         .catch(function(err) { console.log(err) });
 
+        // msg.author.send("Hi there! Welcome to Adorable Alarms!")
     },
   };
