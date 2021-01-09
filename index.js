@@ -10,6 +10,17 @@ Object.keys(botCommands).map(key => {
 
 const TOKEN = process.env.TOKEN;
 
+const Queue = require('bull');
+
+var scrapingQueue = new Queue('scraper', process.env.REDIS_URL);
+scrapingQueue.process('scraper.js')
+
+scrapingQueue.add('test', {repeat: {cron: '*/15 * * * *'}});
+
+scrapingQueue.on('completed', function(job, result){
+  console.log('Completed job');
+})
+
 bot.login(TOKEN);
 
 bot.on('ready', () => {
