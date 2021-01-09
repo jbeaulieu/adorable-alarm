@@ -1,13 +1,15 @@
 module.exports = function(job){
 
+    console.log('Starting job: ' + job);
+  
     const HTMLParser = require('node-html-parser');
-    const root = 'https://old.reddit.com/r/aww/hot/?limit=10';
+    const base_url = 'https://old.reddit.com/r/aww/hot/?limit=10';
   
     const fetch = require('node-fetch');
   
     let postList = []
   
-    fetch(root)
+    fetch(base_url)
         .then(res => res.text())
         .then(body => {
   
@@ -24,8 +26,8 @@ module.exports = function(job){
             console.log(postList)
             var selection ='http://reddit.com' + postList[Math.floor(Math.random() * postList.length)];
             console.log('SELECTED: ' + selection)
-            return Promise.resolve(selection);
-    });
+            return selection;
+    }).catch(err => console.error(err));
   
-    return Promise.reject(-1);
+    return -1;
 }
