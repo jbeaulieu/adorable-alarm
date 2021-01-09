@@ -1,4 +1,5 @@
 require('dotenv').config();
+let express = require('express')
 const Discord = require('discord.js');
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
@@ -8,9 +9,16 @@ Object.keys(botCommands).map(key => {
   bot.commands.set(botCommands[key].name, botCommands[key]);
 });
 
+let PORT = process.env.PORT || '5000';
 const TOKEN = process.env.TOKEN;
 
+let app = express();
+
 const Queue = require('bull');
+
+app.use(express.static("public"))
+
+app.listen(PORT, () => console.log("Server started!"));
 
 var scrapingQueue = new Queue('scraper', process.env.REDIS_URL);
 scrapingQueue.process('scraper.js')

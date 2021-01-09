@@ -1,0 +1,26 @@
+body{
+    background-color: #6455BE;
+    color: #FFFFFF;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.headline {
+	transition: color .2s linear;
+	font-size: 48px;
+	line-height: 60px;
+	color: #B4AAFF;
+	letter-spacing: -1px;
+	margin-bottom: 5px;
+}
+
+.subheader, p {
+    font-size: 18px;
+}
+
+hr {
+    height: 1px;
+    border: none;
+    width: 250px;
+    margin: 25px 0;
+    background-color: #B4AAFF;
+}
