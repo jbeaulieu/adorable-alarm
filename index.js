@@ -12,22 +12,19 @@ Object.keys(botCommands).map(key => {
 let PORT = process.env.PORT || '5000';
 const TOKEN = process.env.TOKEN;
 
-let app = express();
-
 const Queue = require('bull');
+let linkGenerator = new Queue('audio transcoding', process.env.REDIS_URL);
+let outer_result = '';
 
+linkGenerator.on('global:completed', function(job, result){
+    console.log('Completed job');
+    console.log('RESULT:' + result);
+    outer_result = result;
+});
+
+let app = express();
 app.use(express.static("public"))
-
 app.listen(PORT, () => console.log("Server started!"));
-
-var scrapingQueue = new Queue('scraper', process.env.REDIS_URL);
-scrapingQueue.process('scraper.js')
-
-scrapingQueue.add('test', {repeat: {cron: '*/15 * * * *'}});
-
-scrapingQueue.on('completed', function(job, result){
-  console.log('Completed job');
-})
 
 bot.login(TOKEN);
 
