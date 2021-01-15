@@ -1,6 +1,6 @@
 const Queue = require('bull');
 
-let linkGenerator = new Queue('audio transcoding', process.env.REDIS_URL);
+let linkGenerator = new Queue('link scraping', process.env.REDIS_URL);
 
 linkGenerator.process(function(job, done){
 
@@ -34,7 +34,7 @@ linkGenerator.process(function(job, done){
       // Choose a random number to select a post, and add the reddit.com domain prefix to make it a link
       var random = Math.floor(Math.random() * postList.length)
       var selection = DOMAIN_PREFIX + postList[random];
-      console.log(`New link selected: ${selection}`);
+      console.log(`Selected new link: ${selection}`);
 
       done(null, selection);
 
