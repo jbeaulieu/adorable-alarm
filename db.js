@@ -69,15 +69,31 @@ var userExists = function(discord_id) {
 var createAlarm = function(user_id, time) {
 
     return new Promise(function (resolve, reject) {
-        pool.query(`INSERT INTO alarms VALUES (DEFAULT, '${user_id}', TO_TIMESTAMP('${time}', 'HH24:MI:SS')::TIME, now()::timestamp)`, function(err, result) {
+
+        pool.query(`SELECT timezone from users WHERE id=${user_id}`, function(err, result) {
             if (err) {
                 return reject(err);
             } else {
-                if (result.rowCount > 0) {
-                    return resolve(result.rows);
-                }
+                let timezone = result.rows[0].timezone;
+
+                pool.query(`SELECT timezone('UTC', time with time zone '${time}${timezone}')`, function (err, result) {
+                    if (err) {
+                        return reject(err);
+                    } else {
+                        let alarmUTC = result.rows[0].timezone;
+                        pool.query(`INSERT INTO alarms VALUES (DEFAULT, '${user_id}', TO_TIMESTAMP('${alarmUTC}', 'HH24:MI:SS')::TIME, now()::timestamp)`, function(err, result) {
+                            if (err) {
+                                return reject(err);
+                            } else {
+                                if (result.rowCount > 0) {
+                                    return resolve(result.rows);
+                                }
+                            }
+                            return resolve(false);
+                        });
+                    }
+                });
             }
-            return resolve(false);
         });
     });
 };
@@ -85,11 +101,27 @@ var createAlarm = function(user_id, time) {
 var deleteAlarm = function(user_id, time) {
 
     return new Promise(function (resolve, reject) {
-        pool.query(`DELETE FROM alarms WHERE user_id = '${user_id}' AND alarm = '${time}'`, function(err, result) {
+
+        pool.query(`SELECT timezone from users WHERE id=${user_id}`, function(err, result) {
             if (err) {
                 return reject(err);
+            } else {
+                let timezone = result.rows[0].timezone;
+
+                pool.query(`SELECT timezone('UTC', time with time zone '${time}${timezone}')`, function (err, result) {
+                    if (err) {
+                        return reject(err);
+                    } else {
+                        let timeUTC = result.rows[0].timezone;
+                        pool.query(`DELETE FROM alarms WHERE user_id = '${user_id}' AND alarm = '${timeUTC}'`, function(err, result) {
+                            if (err) {
+                                return reject(err);
+                            }
+                            return resolve(true);
+                        });
+                    }
+                });
             }
-            return resolve(true);
         });
     });
 }
@@ -159,6 +191,19 @@ var getTimezone = function(user_id) {
 
 }
 
+var getAlarmsAtTime = function(time) {
+
+    return new Promise(function (resolve, reject) {
+        pool.query(`SELECT alarms.id, alarms.alarm, users.id, users.discord_id FROM alarms INNER JOIN users ON alarms.user_id=users.id WHERE alarm='${time}'`, function(err, result) {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(result.rows);
+        });
+    });
+
+}
+
 module.exports = {
   userExists: (text) => userExists(text),
   createUser: (newUser, timezone) => createUser(newUser, timezone),
@@ -168,5 +213,6 @@ module.exports = {
   deleteAllAlarms: (user_id) => deleteAllAlarms(user_id),
   parsetime: (text) => parsetime(text),
   parseTimezone: (text) => parseTimezone(text),
-  setTimezone: (user_id, timezone) => setTimezone(user_id, timezone)
+  setTimezone: (user_id, timezone) => setTimezone(user_id, timezone),
+  getAlarmsAtTime: (time) => getAlarmsAtTime(time)
 }
