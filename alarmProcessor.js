@@ -20,7 +20,7 @@ alarmProcessor.process(function(job, done){
 
     var alarmTime = `${hours}:${minutes}:00`;
 
-    console.log(alarmTime);
+    console.log(`Processing alarms for ${alarmTime}`);
 
     // Connect to scraping queue so that we can pull job information
     let linkGenerator = new Queue('link scraping', REDIS_URL);
@@ -31,23 +31,22 @@ alarmProcessor.process(function(job, done){
         linkGenerator.getJobs(['completed'], 0, 0, false),  // Get the most recent scraping job
         bot.login(process.env.TOKEN)                        // Log in with the discord bot
     ]).then((promises) => {
-
-        var alarmList = promises[0];
+        var userList = promises[0];
         var job = promises[1];
 
         // The return value of the last scraping job will contain the most recently selected link
         var link = job[0].returnvalue;
 
-        console.log(alarmList);
-        console.log(link);
+        console.log(`Sending alarms to ${userList.length} users`);
+        console.log(`Alarm link: ${link}`);
 
         // Get the discord id associated with each alarm, and send them a DM with the link
-        alarmList.forEach(alarm => {
-            bot.users.fetch(alarm.discord_id).then(user => {
+        userList.forEach(user_id => {
+            bot.users.fetch(user_id.discord_id).then(user => {
                 user.send(link);
             });
         });
 
-        done(null, 'another alarm')
+        done(null, 'Alarms sent successfully')
     });
 });
