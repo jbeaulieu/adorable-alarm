@@ -6,5 +6,7 @@ module.exports = {
     Unsubscribe: require('./unsubscribe'),
     AddAlarm: require('./addAlarm'),
     RemoveAlarm: require('./removeAlarm'),
-    Timezone: require('./timezone')
+    Timezone: require('./timezone'),
+    AddChannel: require('./addChannel'),
+    RemoveChannel: require('./removeChannel')
   };

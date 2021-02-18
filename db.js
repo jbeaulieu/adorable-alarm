@@ -66,6 +66,48 @@ var userExists = function(discord_id) {
     });
 };
 
+var addChannel = function(channel_id) {
+
+    return new Promise(function (resolve, reject) {
+        pool.query(`SELECT FROM channels WHERE channel_id = '${channel_id}'`, function(err, result) {
+            if(err) {
+                return reject(err)
+            } else if(result.rowCount > 0) {
+                // Channel is already signed up
+                return resolve(-1);
+            } else {
+                pool.query(`INSERT INTO channels VALUES (DEFAULT, '${channel_id}', now()::timestamp)`, function(err, result) {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve();
+                });
+            }
+        });
+    });
+};
+
+var deleteChannel = function(channel_id) {
+
+    return new Promise(function (resolve, reject) {
+        pool.query(`SELECT FROM channels WHERE channel_id = '${channel_id}'`, function(err, result) {
+            if(err) {
+                return reject(err)
+            } else if(result.rowCount == 0) {
+                // Channel does not exist in database
+                return resolve(-1);
+            } else {
+                pool.query(`DELETE FROM channels WHERE channel_id = '${channel_id}'`, function(err, result) {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve();
+                });
+            }
+        });
+    });
+}
+
 var createAlarm = function(user_id, time) {
 
     return new Promise(function (resolve, reject) {
@@ -219,6 +261,8 @@ module.exports = {
   userExists: (text) => userExists(text),
   createUser: (newUser, timezone) => createUser(newUser, timezone),
   deleteUser: (user_id) => deleteUser(user_id),
+  addChannel: (channel_id) => addChannel(channel_id),
+  deleteChannel: (channel_id) => deleteChannel(channel_id),
   createAlarm: (user_id, time) => createAlarm(user_id, time),
   deleteAlarm: (user_id, time) => deleteAlarm(user_id, time),
   deleteAllAlarms: (user_id) => deleteAllAlarms(user_id),
