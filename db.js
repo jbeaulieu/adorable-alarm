@@ -201,7 +201,18 @@ var getAlarmsAtTime = function(time) {
             return resolve(result.rows);
         });
     });
+}
 
+var getAlarmsForUser = function(discord_id) {
+
+    return new Promise(function (resolve, reject) {
+        pool.query(`SELECT users.id, discord_id, alarm FROM users, alarms WHERE users.id = alarms.user_id AND discord_id='${discord_id}'`, function(err, result) {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(result.rows)
+        }); 
+    });
 }
 
 module.exports = {
@@ -214,5 +225,6 @@ module.exports = {
   parsetime: (text) => parsetime(text),
   parseTimezone: (text) => parseTimezone(text),
   setTimezone: (user_id, timezone) => setTimezone(user_id, timezone),
-  getAlarmsAtTime: (time) => getAlarmsAtTime(time)
+  getAlarmsAtTime: (time) => getAlarmsAtTime(time),
+  getAlarmsForUser: (discord_id) => getAlarmsForUser(discord_id)
 }
